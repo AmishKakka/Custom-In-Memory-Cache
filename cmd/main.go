@@ -6,7 +6,20 @@ import (
 	"time"
 	"sync"
 	"math/rand"
+	"runtime"
 )
+
+func printMemoryStats(label string) {
+	var m runtime.MemStats
+	// Force a micro-pause to collect allocator metrics
+	runtime.ReadMemStats(&m)
+
+	fmt.Printf("\nMemory Stats [%s]:\n", label)
+	fmt.Printf("Heap Alloc:      %0.2f MB (Active data in RAM)\n", float64(m.Alloc)/1024/1024)
+	fmt.Printf("Total Alloc:     %0.2f MB (Cumulative lifetime memory churn)\n", float64(m.TotalAlloc)/1024/1024)
+	fmt.Printf("Sys (OS Memory): %0.2f MB (RAM reserved from the OS)\n", float64(m.Sys)/1024/1024)
+	fmt.Printf("GC Cycles Run:   %d times (Garbage collector)\n", m.NumGC)
+}
 
 func main() {
 	// create a cache
@@ -25,6 +38,7 @@ func main() {
 	// 	fmt.Printf("key: %s \tval: %v\n", key, val)
 	// }
 
+	printMemoryStats("Before testing...")
 	go cache.Cleanup(50 * time.Millisecond)
 
 	fmt.Println("Running 5 workers x 6000 iterations (180,000 total cache operations)...")
@@ -44,8 +58,8 @@ func main() {
 			r := rand.New(rand.NewSource(time.Now().UnixNano() + int64(workerID)))
 
 			for j := 0; j < iterationsPerWorker; j++ {
-				// We pick random key numbers from 0 to 99 to ensure keys collide across workers.
-				// For lookups, we occasionally look up keys 100-110 to simulate keys that don't exist.
+				// We pick random key numbers from 0 to 20 to ensure keys collide across workers.
+				// For lookups, we occasionally look up keys 0 to 30 to simulate keys that don't exist.
 				randomSetKey := fmt.Sprintf("account_%d", r.Intn(20))
 				randomGetKey := fmt.Sprintf("account_%d", r.Intn(30)) 
 				randomDelKey := fmt.Sprintf("account_%d", r.Intn(15))
@@ -68,8 +82,13 @@ func main() {
 
 				// again set a vlaue to random key
 				cache.Get(randomSetKey)
+
+				// printing memory stats midway for each worker
+				if (workerID == 1 || workerID == 3) && j == iterationsPerWorker/2 {
+					printMemoryStats("Mid-operation memory check: ")
+				}
 			}
-			fmt.Printf("Worker %d successfully processed %d iterations (180k ops)\n", workerID, iterationsPerWorker)
+			fmt.Printf("Worker %d successfully processed %d iterations\n", workerID, iterationsPerWorker)
 		}(i)
 	}
 	// block the main execution thread until all 5 workers finish their tasks
@@ -79,6 +98,7 @@ func main() {
 	fmt.Printf("\nAll concurrent operations completed cleanly in %v!\n", duration)
 
 	// final verification of the background cleanup process
+	printMemoryStats("All operations completed...")
 	fmt.Println("\nVerifying final background state...")
 	
 	// adding fresh keys

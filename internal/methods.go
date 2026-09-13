@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"fmt"
+	// "fmt"
 	"time"
 )
 
@@ -22,7 +22,7 @@ func (c *cache) Set(key string, val any, ttl time.Duration) {
 		Value: val,
 		TTL: expiration,
 	}
-	fmt.Printf("key: %s \tval: %v\n", key, val)
+	// fmt.Printf("key: %s \tval: %v\n", key, val)
 }
 
 // Retrieve the key from cache
@@ -32,11 +32,11 @@ func (c *cache) Get(key string) (any, bool) {
 	// see if key exists
 	item, exists := c.entry[key]
 	if exists == false {
-		fmt.Printf("'%s' key does not exist.\n", key)
+		// fmt.Printf("'%s' key does not exist.\n", key)
 		return nil, false
 	}
 	if time.Now().After(item.TTL) {
-		fmt.Printf("'%s' key has expired.\n", key)
+		// fmt.Printf("'%s' key has expired.\n", key)
 		return nil, false
 	}
 	return item.Value, true
