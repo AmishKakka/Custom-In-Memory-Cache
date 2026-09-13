@@ -22,6 +22,7 @@ func (c *cache) Set(key string, val any, ttl time.Duration) {
 		Value: val,
 		TTL: expiration,
 	}
+	fmt.Printf("key: %s \tval: %v\n", key, val)
 }
 
 // Retrieve the key from cache
@@ -58,12 +59,13 @@ func (c *cache) Cleanup(interval time.Duration) {
 	// iterate over the channel where ticks are delivered
 	for range ticker.C {
 		c.Lock()
-		defer c.Unlock()
 		// Removing expired keys
 		for k, v := range c.entry {
 			if time.Now().After(v.TTL) {
 				delete(c.entry, k)
 			}
 		}
+		// will free the lock as soon as this loop finishes and not when the function finishes
+		c.Unlock()
 	}
 }
