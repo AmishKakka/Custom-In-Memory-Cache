@@ -38,7 +38,8 @@ func (c *cache) SET(key string, val any, ttl time.Duration) {
 	// acquiring the WAL file
 	c.walMU.Lock()
 	// write to the file
-	_, err := fmt.Fprintf(c.walFile, "SET|%s|%v|%d\n", key, val, ttl)
+	expiration := time.Now().Add(ttl)
+	_, err := fmt.Fprintf(c.walFile, "SET|%s|%v|%d\n", key, val, expiration.UnixNano())
 	if err == nil {
 		// writing to disk the file contents
 		c.walFile.Sync()
