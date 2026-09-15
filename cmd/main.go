@@ -11,7 +11,6 @@ import (
 
 func printMemoryStats(label string) {
 	var m runtime.MemStats
-	// Force a micro-pause to collect allocator metrics
 	runtime.ReadMemStats(&m)
 
 	fmt.Printf("\nMemory Stats [%s]:\n", label)
@@ -25,15 +24,15 @@ func main() {
 	// create a cache
 	cache := internal.NewCache()
 	// // add key-value pairs to it
-	// cache.Set("age", 24, 50*time.Second)
+	// cache.SET("age", 24, 50*time.Second)
 	// // Retrieve values
 	// key := "age"
-	// val, ok := cache.Get(key)
+	// val, ok := cache.GET(key)
 	// if ok == true {
 	// 	fmt.Printf("key: %s \tval: %v\n", key, val)
 	// }
 	// key = "name"
-	// val, ok = cache.Get(key)
+	// val, ok = cache.GET(key)
 	// if ok == true {
 	// 	fmt.Printf("key: %s \tval: %v\n", key, val)
 	// }
@@ -64,24 +63,24 @@ func main() {
 				randomGetKey := fmt.Sprintf("account_%d", r.Intn(30)) 
 				randomDelKey := fmt.Sprintf("account_%d", r.Intn(15))
 
-				// Set a dynamic key with varying values and 40ms TTL
+				// SET a dynamic key with varying values and 40ms TTL
 				randomVal := r.Float64() * 5000
-				cache.Set(randomSetKey, randomVal, 40*time.Millisecond)
+				cache.SET(randomSetKey, randomVal, 40*time.Millisecond)
 
-				// Get a key (may exist, may not exist, or might have expired)
-				cache.Get(randomGetKey)
+				// GET a key (may exist, may not exist, or might have expired)
+				cache.GET(randomGetKey)
 
-				// Set value to a heavily used key
-				cache.Set("master_ledger", r.Intn(99999), 100*time.Millisecond)
+				// SET value to a heavily used key
+				cache.SET("master_ledger", r.Intn(99999), 100*time.Millisecond)
 
 				// read the key
-				cache.Get(randomGetKey)
+				cache.GET(randomGetKey)
 
 				// Delete a random key
-				cache.Delete(randomDelKey)
+				cache.DEL(randomDelKey)
 
 				// again set a vlaue to random key
-				cache.Get(randomSetKey)
+				cache.GET(randomSetKey)
 
 				// printing memory stats midway for each worker
 				if (workerID == 1 || workerID == 3) && j == iterationsPerWorker/2 {
@@ -102,13 +101,13 @@ func main() {
 	fmt.Println("\nVerifying final background state...")
 	
 	// adding fresh keys
-	cache.Set("final_check_1", "alive", 100*time.Millisecond)
-	cache.Set("final_check_2", "expired_soon", 10*time.Millisecond)
+	cache.SET("final_check_1", "alive", 100*time.Millisecond)
+	cache.SET("final_check_2", "expired_soon", 10*time.Millisecond)
 
 	// Let the cleanup and let keys naturally pass their TTL
 	time.Sleep(200 * time.Millisecond)
-	_, ok1 := cache.Get("final_check_1")
-	_, ok2 := cache.Get("final_check_2")
+	_, ok1 := cache.GET("final_check_1")
+	_, ok2 := cache.GET("final_check_2")
 
 	fmt.Printf("Key 1 active check (Expected false): %v\n", ok1)
 	fmt.Printf("Key 2 active check (Expected false): %v\n", ok2)

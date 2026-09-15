@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"os"
 	"sync"
 	"time"
 )
@@ -13,6 +14,10 @@ type entry struct {
 
 // Cache sytem with Read/Write mutex called anonymously
 type cache struct {
-	sync.RWMutex
+	// Mutex exclusively for the map
+	cacheMU sync.RWMutex
 	entry map[string]*entry
+	// mutex exclusively for the append-only file
+	walMU sync.Mutex
+	walFile *os.File
 }
