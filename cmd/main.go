@@ -45,6 +45,8 @@ func main() {
 	var wg sync.WaitGroup
 	workersCount := 5
 	iterationsPerWorker := 6000
+	// goroutine to write to the WAL log file
+	go cache.WriteToFile()
 
 	// Launching the concurrent workers
 	for i := 1; i <= workersCount; i++ {

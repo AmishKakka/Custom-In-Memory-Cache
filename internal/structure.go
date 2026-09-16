@@ -17,7 +17,8 @@ type cache struct {
 	// Mutex exclusively for the map
 	cacheMU sync.RWMutex
 	entry map[string]*entry
-	// mutex exclusively for the append-only file
-	walMU sync.Mutex
+	// removed lock on file because introduced channels
 	walFile *os.File
+	// creating a channel to store all mutations and then consume fixed no. of items
+	walEntry chan string
 }
