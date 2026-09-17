@@ -23,14 +23,18 @@ func (c *cache) ReadFromWAL(filename string) error {
 		text := scanner.Text()
 		parts := strings.Split(text, "|")
 		key := parts[1]
-		if parts[0] == "SET" {
+		if parts[0] == "S" {
 			// 1: key		2: val		3: ttl
 			// parsing string back to Float or Int or bool or string
 			var parsedVal any
 				val := parts[2]
-			if floatVal, err := strconv.ParseFloat(val, 64); err == nil {
+			// incase a process crashes
+			if len(parts) < 2 {
+				continue
+			}
+			if floatVal, err := strconv.Atoi(val); err == nil {
 				parsedVal = floatVal
-			} else if intVal, err := strconv.Atoi(val); err == nil {
+			} else if intVal, err := strconv.ParseFloat(val, 64); err == nil {
 				parsedVal = intVal
 			} else if boolVal, err := strconv.ParseBool(val); err == nil {
 				parsedVal = boolVal
@@ -47,7 +51,7 @@ func (c *cache) ReadFromWAL(filename string) error {
 				TTL: time.Unix(0, ttl),
 			}
 		}
-		if parts[0] == "DEL" {
+		if parts[0] == "D" {
 			delete(c.entry, key)
 		}
 	}

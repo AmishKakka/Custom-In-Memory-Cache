@@ -96,6 +96,7 @@ func main() {
 	startTime := time.Now()
 	wg.Wait()
 	duration := time.Since(startTime)
+	cache.CloseFile()
 	fmt.Printf("\nAll concurrent operations completed cleanly in %v!\n", duration)
 
 	// final verification of the background cleanup process

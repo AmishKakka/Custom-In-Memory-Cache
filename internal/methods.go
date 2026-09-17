@@ -46,6 +46,11 @@ func (c *cache) WriteToFile() {
 	}
 }
 
+// Method to close the WAL log file
+func (c *cache) CloseFile() {
+	c.walFile.Close()
+}
+
 // Aquires the lock and creates/updates key
 func (c *cache) set(key string, val any, expiration time.Time) {
 	c.cacheMU.Lock()
