@@ -21,8 +21,8 @@ func printMemoryStats(label string) {
 }
 
 func main() {
-	// create a cache
-	cache := internal.NewCache()
+	// create a cache with a max size of 10,000 elements
+	cache := internal.NewCache(10000)
 	// // add key-value pairs to it
 	// cache.SET("age", 24, 50*time.Second)
 	// // Retrieve values
